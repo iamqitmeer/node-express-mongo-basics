@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose, { mongo } from "mongoose";
 import path from "path";
 const app = express();
 const PORT = 5000;
@@ -6,6 +7,8 @@ const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server is Running ON Port ${PORT}`);
 });
+
+app.use(express.urlencoded({ extended: true }));
 
 /*
 
@@ -69,10 +72,45 @@ app.get("/", (req, res) => {
   // console.log(path.resolve()+"/index.html")
   // res.sendFile(path.resolve()+"/index.html");
 
-  let halfPath = path.resolve();
-  let joinedPath = path.join(halfPath, "./index.html");
+  // let halfPath = path.resolve();
+  // let joinedPath = path.join(halfPath, "./index.html");
 
-  res.sendFile(joinedPath);});``
+  // res.sendFile(joinedPath);
+
+  // CSS File (Static)
+
+  app.use(express.static(path.join(path.resolve(), "public")));
+
+  res.render("index.ejs");
+});
+
+mongoose
+  .connect("mongodb+srv://blog:blog@blog.2jqcc.mongodb.net/learnBackend")
+  .then(() => console.log("Database Connected"));
+
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  password: String,
+});
+
+const userModal = mongoose.model("Users", userSchema);
+
+app.post("/user_data", async (req, res) => {
+  console.log(req.body);
+
+  let user = {
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+  };
+
+  await userModal.create(user)
+
+  console.log("Data Saved Succesfully! ")
+
+  res.json({ body: req.body });
+});
 
 app.get("/about", (req, res) => {
   res.send({
